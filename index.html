@@ -5,23 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Api Practice</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
+    <div style="width: 1000px; height: 1000px;">
+        <canvas id="chart"></canvas>
+    </div>
 
     <script>
+        const xLabels = [];
+        const yTemps = [];
         async function getData() {
             const response = await fetch('ZonAnn.Ts+dSST.csv');
             const data = await response.text();
 
             const rows = data.split('\n').slice(1);
             rows.forEach(row => {
-                const columns = columns.split(',');
+                const columns = row.split(',');
                 const year = columns[0];
-                const temp = columns[1];
+                const temp = parseFloat(columns[1]);
+                xLabels.push(year);
+                yTemps.push(temp + 14)
             })
         }
-        getData();
+
+        async function chart() {
+            await getData();
+            const ctx = document.getElementById('chart');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xLabels,
+                    datasets: [{
+                        label: 'Global Average Temperature (C)',
+                        fill: true,
+                        data: yTemps,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function (value, index, ticks) {
+                                    return value + '°';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        chart();
+
     </script>
 </body>
 
